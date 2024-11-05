@@ -6,38 +6,51 @@ import java.util.Map;
 
 public class FileHandler {
 
-    public static String readFile(String filename) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(filename));
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            sb.append(line);
+    public static String readFile(String filePath) throws IOException {
+        StringBuilder content = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
         }
-        reader.close();
-        return sb.toString();
+        return content.toString();
     }
 
-    public static void writeTokens(String filename, List<Token> tokens) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
-        for (Token token : tokens) {
-            writer.write(token.toString());
-            writer.newLine();
+    public static void writeTokens(String filePath, List<Token> tokens) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (Token token : tokens) {
+                writer.write(token.toString());
+                writer.newLine();
+            }
         }
-        writer.close();
     }
 
-    public static void writeSymbolTable(String filename, Map<String, Integer> symbols) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
-        for (Map.Entry<String, Integer> entry : symbols.entrySet()) {
-            writer.write(entry.getValue() + " - " + entry.getKey());
-            writer.newLine();
+    public static void writeSymbolTable(String filePath, Map<Integer, SymbolTable.Symbol> symbols) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (Map.Entry<Integer, SymbolTable.Symbol> entry : symbols.entrySet()) {
+                writer.write(entry.getKey() + " - " + entry.getValue().toString());
+                writer.newLine();
+            }
         }
-        writer.close();
     }
 
-    public static void writeSyntaxTree(String filename, Node syntaxTree) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
-        writer.write(syntaxTree.printTree("", true));
-        writer.close();
+    public static void writeSyntaxTree(String filePath, Node syntaxTree) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            writeNode(writer, syntaxTree, 0);
+        }
+    }
+
+    private static void writeNode(BufferedWriter writer, Node node, int level) throws IOException {
+        if (node == null) return;
+
+        for (int i = 0; i < level; i++) {
+            writer.write("  ");
+        }
+        writer.write(node.getValue());
+        writer.newLine();
+
+        writeNode(writer, node.getLeft(), level + 1);
+        writeNode(writer, node.getRight(), level + 1);
     }
 }

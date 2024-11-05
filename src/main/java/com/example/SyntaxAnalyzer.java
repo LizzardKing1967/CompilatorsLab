@@ -8,100 +8,79 @@ public class SyntaxAnalyzer {
     public Node analyze(List<Token> tokens) {
         Stack<Node> nodeStack = new Stack<>();
         Stack<Character> operatorStack = new Stack<>();
-        int openParentheses = 0; // Счетчик открывающих скобок
+        int openParentheses = 0;
 
         Token previousToken = null;
 
         for (Token token : tokens) {
-            String tokenType = token.getType();
+            TokenType tokenType = token.getType();
 
-            if (isOperator(tokenType)) {
-                if (previousToken == null || isOperator(previousToken.getType()) || previousToken.getType().equals("(")) {
-                    System.err.println("Синтаксическая ошибка! У операции <" + tokenType + "> на позиции " + tokens.indexOf(token) + " отсутствует операнд.");
-                    return null; // Вместо System.exit
+            if (tokenType == TokenType.OPERATOR) {
+                if (previousToken == null || previousToken.getType() == TokenType.OPERATOR || previousToken.getType() == TokenType.OPEN_PAREN) {
+                    System.err.println("Синтаксическая ошибка! Операции <" + token.getValue() + "> не хватает операнда на позиции " + tokens.indexOf(token));
+                    return null;
                 }
-
-            } else if (tokenType.equals(")")) {
-                if (previousToken == null || previousToken.getType().equals("(")) {
+            } else if (tokenType == TokenType.CLOSE_PAREN) {
+                if (previousToken == null || previousToken.getType() == TokenType.OPEN_PAREN) {
                     System.err.println("Синтаксическая ошибка! Лишняя закрывающая скобка на позиции " + tokens.indexOf(token));
-                    return null; // Вместо System.exit
+                    return null;
                 }
             }
 
-            // Обработка идентификаторов и констант
-            if (tokenType.equals("id") || tokenType.matches("\\d+(\\.\\d+)?")) {
+            if (tokenType == TokenType.IDENTIFIER || tokenType == TokenType.CONSTANT) {
                 nodeStack.push(new Node(token.toString()));
-            } else if (isOperator(tokenType)) {
-                while (!operatorStack.isEmpty() && precedence(operatorStack.peek()) >= precedence(tokenType.charAt(0))) {
-                    if (nodeStack.size() < 2) {
-                        System.err.println("Синтаксическая ошибка! Недостаточно операндов для завершения выражения.");
-                        return null; // Вместо System.exit
-                    }
-                    Node right = nodeStack.pop();
-                    Node left = nodeStack.pop();
-                    nodeStack.push(new Node(String.valueOf(operatorStack.pop()), left, right));
+            } else if (tokenType == TokenType.OPERATOR) {
+                while (!operatorStack.isEmpty() && precedence(operatorStack.peek()) >= precedence(token.getValue().charAt(0))) {
+                    if (!processOperator(nodeStack, operatorStack)) return null;
                 }
-                operatorStack.push(tokenType.charAt(0));
-            } else if (tokenType.equals("(")) {
+                operatorStack.push(token.getValue().charAt(0));
+            } else if (tokenType == TokenType.OPEN_PAREN) {
                 operatorStack.push('(');
                 openParentheses++;
-            } else if (tokenType.equals(")")) {
+            } else if (tokenType == TokenType.CLOSE_PAREN) {
                 openParentheses--;
-                if (operatorStack.isEmpty()) {
-                    System.err.println("Синтаксическая ошибка! Лишняя закрывающая скобка на позиции " + tokens.indexOf(token));
-                    return null; // Вместо System.exit
-                }
-                while (!operatorStack.isEmpty() && operatorStack.peek() != '(') {
-                    if (nodeStack.size() < 2) {
-                        System.err.println("Синтаксическая ошибка! Недостаточно операндов для завершения выражения.");
-                        return null; // Вместо System.exit
-                    }
-                    Node right = nodeStack.pop();
-                    Node left = nodeStack.pop();
-                    nodeStack.push(new Node(String.valueOf(operatorStack.pop()), left, right));
-                }
-                if (!operatorStack.isEmpty()) {
-                    operatorStack.pop(); // Убираем '('
-                } else {
-                    System.err.println("Синтаксическая ошибка! Лишняя закрывающая скобка.");
-                    return null; // Вместо System.exit
-                }
+                if (!closeParenthesisHandling(nodeStack, operatorStack)) return null;
             }
 
             previousToken = token;
         }
 
-        // Проверяем несбалансированные скобки
-        if (openParentheses > 0) {
-            System.err.println("Синтаксическая ошибка! Не хватает закрывающей скобки.");
-            return null; // Вместо System.exit
-        } else if (openParentheses < 0) {
-            System.err.println("Синтаксическая ошибка! Лишняя закрывающая скобка.");
-            return null; // Вместо System.exit
-        }
-
-        // Проверка на случай, если выражение заканчивается операцией
-        if (previousToken != null && isOperator(previousToken.getType())) {
-            System.err.println("Синтаксическая ошибка! Выражение заканчивается операцией <" + previousToken.getType() + ">.");
-            return null; // Вместо System.exit
-        }
-
-        // Обрабатываем оставшиеся операторы
-        while (!operatorStack.isEmpty()) {
-            if (nodeStack.size() < 2) {
-                System.err.println("Синтаксическая ошибка! Недостаточно операндов для завершения выражения.");
-                return null; // Вместо System.exit
-            }
-            Node right = nodeStack.pop();
-            Node left = nodeStack.pop();
-            nodeStack.push(new Node(String.valueOf(operatorStack.pop()), left, right));
-        }
+        if (!finishExpression(nodeStack, operatorStack, openParentheses)) return null;
 
         return nodeStack.isEmpty() ? null : nodeStack.pop();
     }
 
-    private boolean isOperator(String token) {
-        return "+-*/".contains(token);
+    private boolean processOperator(Stack<Node> nodeStack, Stack<Character> operatorStack) {
+        if (nodeStack.size() < 2) {
+            System.err.println("Синтаксическая ошибка! Недостаточно операндов для завершения выражения.");
+            return false;
+        }
+        Node right = nodeStack.pop();
+        Node left = nodeStack.pop();
+        nodeStack.push(new Node(String.valueOf(operatorStack.pop()), left, right));
+        return true;
+    }
+
+    private boolean closeParenthesisHandling(Stack<Node> nodeStack, Stack<Character> operatorStack) {
+        while (!operatorStack.isEmpty() && operatorStack.peek() != '(') {
+            if (!processOperator(nodeStack, operatorStack)) return false;
+        }
+        if (operatorStack.isEmpty() || operatorStack.pop() != '(') {
+            System.err.println("Синтаксическая ошибка! Лишняя закрывающая скобка.");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean finishExpression(Stack<Node> nodeStack, Stack<Character> operatorStack, int openParentheses) {
+        if (openParentheses > 0) {
+            System.err.println("Синтаксическая ошибка! Не хватает закрывающей скобки.");
+            return false;
+        }
+        while (!operatorStack.isEmpty()) {
+            if (!processOperator(nodeStack, operatorStack)) return false;
+        }
+        return true;
     }
 
     private int precedence(char operator) {

@@ -1,10 +1,12 @@
+// Token.java
 package com.example;
 
 public class Token {
-    private String type;
+    private TokenType type;
     private String value;
     private String description;
-    public Token(String type, String value, String description) {
+
+    public Token(TokenType type, String value, String description) {
         this.type = type;
         this.value = value;
         this.description = description;
@@ -15,7 +17,7 @@ public class Token {
         return "<" + type + (value != null ? "," + value : "") + "> - " + description;
     }
 
-    public String getType() {
+    public TokenType getType() {
         return type;
     }
 
