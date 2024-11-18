@@ -27,7 +27,8 @@ public class SemanticAnalyzer {
     private void checkDivisionByZero(Node node) {
         if (node.getValue().equals("/")) {
             Node right = node.getRight();
-            if (right.getValue().equals("0") || right.getValue().equals("0.0")) {
+            String rightValue = getActualValue(right);
+            if (rightValue.equals("0") || rightValue.equals("0.0")) {
                 System.err.println("Семантическая ошибка! Деление на ноль.");
                 System.exit(1);
             }
@@ -39,6 +40,23 @@ public class SemanticAnalyzer {
         if (node.getRight() != null) {
             checkDivisionByZero(node.getRight());
         }
+    }
+
+    private String getActualValue(Node node) {
+        String value = node.getValue();
+        if (value.startsWith("<CONSTANT,")) {
+            // Извлекаем значение константы из строки
+            String[] parts = value.split(",");
+            if (parts.length > 1) {
+                String constantPart = parts[1];
+                return constantPart.substring(0, constantPart.indexOf(">"));
+            }
+        } else if (value.equals("Int2Float")) {
+            return getActualValue(node.getLeft());
+        } else {
+            return value;
+        }
+        return null;
     }
 
     private Node modifyTree(Node node, SymbolTable symbolTable) {

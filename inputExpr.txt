@@ -1,1 +1,1 @@
-var1[f] + var2[f] * (60 + var8[f]) / 80
+var1[f] + v
