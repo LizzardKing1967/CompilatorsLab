@@ -1,5 +1,5 @@
-<IDENTIFIER,1> - идентификатор с именем var1 вещественный типа
-<OPERATOR,/> - операция деления
-<CONSTANT,0> - константа целого типа
-<CLOSE_PAREN,)> - закрывающая скобка
-<OPERATOR,+> - операция сложения
+<IDENTIFIER,1
+<OPERATOR,+
+<IDENTIFIER,2
+<OPERATOR,*
+<CONSTANT,60

@@ -40,5 +40,9 @@ public class Node {
         }
         return builder.toString();
     }
+
+    public boolean isTemporaryVariable() {
+        return value.startsWith("<id,");
+    }
 }
 

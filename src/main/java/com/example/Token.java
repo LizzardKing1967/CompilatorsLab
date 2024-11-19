@@ -4,17 +4,15 @@ package com.example;
 public class Token {
     private TokenType type;
     private String value;
-    private String description;
 
-    public Token(TokenType type, String value, String description) {
+    public Token(TokenType type, String value) {
         this.type = type;
         this.value = value;
-        this.description = description;
     }
 
     @Override
     public String toString() {
-        return "<" + type + (value != null ? "," + value : "") + "> - " + description;
+        return "<" + type + (value != null ? "," + value : "");
     }
 
     public TokenType getType() {

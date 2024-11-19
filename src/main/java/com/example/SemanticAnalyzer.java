@@ -139,17 +139,16 @@ public class SemanticAnalyzer {
             String[] parts = value.split(",");
             if (parts.length > 1) {
                 String idPart = parts[1];
-                int id = Integer.parseInt(idPart.substring(0, idPart.indexOf(">")));
-                return symbolTable.getSymbolType(id);
+                return symbolTable.getSymbolType(Integer.parseInt(idPart));
             }
         } else if (value.startsWith("<CONSTANT,")) {
             // Извлекаем тип константы из строки
             String[] parts = value.split(",");
             if (parts.length > 1) {
                 String typePart = parts[1];
-                if (typePart.contains("вещественного")) {
+                if (typePart.matches("\\d+\\.\\d+")) {
                     return VariableType.FLOAT;
-                } else if (typePart.contains("целого")) {
+                } else if (typePart.matches("\\d+")) {
                     return VariableType.INTEGER;
                 }
             }

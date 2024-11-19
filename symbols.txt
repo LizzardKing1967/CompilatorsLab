@@ -1,1 +1,5 @@
-1 - var1 [вещественный]
+<id,1> - A, INTEGER
+<id,2> - B, INTEGER
+<id,3> - #T1, INTEGER
+<id,4> - #T2, INTEGER
+<id,5> - #T3, INTEGER

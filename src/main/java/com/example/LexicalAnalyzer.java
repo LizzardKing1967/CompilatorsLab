@@ -49,7 +49,7 @@ public class LexicalAnalyzer {
                     token.setLength(0);
                     type.setLength(0);
                 }
-                tokens.add(new Token(TokenType.OPERATOR, String.valueOf(current), getOperatorDescription(current)));
+                tokens.add(new Token(TokenType.OPERATOR, String.valueOf(current)));
 
             } else if (isParenthesis(current)) {
                 if (token.length() > 0) {
@@ -58,7 +58,7 @@ public class LexicalAnalyzer {
                     type.setLength(0);
                 }
                 tokens.add(new Token(current == '(' ? TokenType.OPEN_PAREN : TokenType.CLOSE_PAREN,
-                        String.valueOf(current), getParenthesisDescription(current)));
+                        String.valueOf(current)));
 
             } else if (Character.isLetterOrDigit(current) || current == '.' || current == '_') {
                 token.append(current);
@@ -80,11 +80,11 @@ public class LexicalAnalyzer {
         if (isIdentifier(token)) {
             VariableType finalType = type.isEmpty() ? VariableType.INTEGER : (type.equalsIgnoreCase("f") ? VariableType.FLOAT : VariableType.INTEGER);
             int id = symbolTable.addSymbol(token, finalType);
-            tokens.add(new Token(TokenType.IDENTIFIER, String.valueOf(id), "идентификатор с именем " + token + " " + finalType.getDescription() + " типа"));
+            tokens.add(new Token(TokenType.IDENTIFIER, String.valueOf(id)));
 
         } else if (isConstant(token)) {
             String description = token.contains(".") ? "константа вещественного типа" : "константа целого типа";
-            tokens.add(new Token(TokenType.CONSTANT, token, description));
+            tokens.add(new Token(TokenType.CONSTANT, token));
 
         } else {
             System.err.println("Лексическая ошибка! Некорректный токен '" + token + "' на позиции " + position);

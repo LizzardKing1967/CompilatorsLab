@@ -1,8 +1,8 @@
 package com.example;
 
 public enum VariableType {
-    INTEGER("целый"),
-    FLOAT("вещественный"), OPERATOR("оператор");
+    INTEGER(""),
+    FLOAT(""), OPERATOR(""), IDENTIFIER("");
 
     private final String description;
 

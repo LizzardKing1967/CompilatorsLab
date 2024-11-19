@@ -26,10 +26,28 @@ public class FileHandler {
         }
     }
 
-    public static void writeSymbolTable(String filePath, Map<Integer, SymbolTable.Symbol> symbols) throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+    public static void writeSymbolTable(String fileName, Map<Integer, SymbolTable.Symbol> symbols) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             for (Map.Entry<Integer, SymbolTable.Symbol> entry : symbols.entrySet()) {
-                writer.write(entry.getKey() + " - " + entry.getValue().toString());
+                writer.write("<id," + entry.getKey() + "> - " + entry.getValue().getName() + ", " + entry.getValue().getType());
+                writer.newLine();
+            }
+        }
+    }
+
+    public static void writeThreeAddressCode(String fileName, List<String> code) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            for (String line : code) {
+                writer.write(line);
+                writer.newLine();
+            }
+        }
+    }
+
+    public static void writePostfixCode(String fileName, List<String> code) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            for (String line : code) {
+                writer.write(line);
                 writer.newLine();
             }
         }
@@ -53,4 +71,5 @@ public class FileHandler {
         writeNode(writer, node.getLeft(), level + 1);
         writeNode(writer, node.getRight(), level + 1);
     }
+
 }

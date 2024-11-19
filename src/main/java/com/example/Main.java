@@ -6,7 +6,7 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         if (args.length < 4) {
-            System.out.println("Usage: java Main LEX|SYN|SEM inputExpr.txt tokens.txt symbols.txt [syntax_tree.txt] [syntax_tree_mod.txt.txt]");
+            System.out.println("Usage: java Main LEX|SYN|SEM|GEN1|GEN2 inputExpr.txt tokens.txt symbols.txt [syntax_tree.txt] [syntax_tree_mod.txt.txt]");
             return;
         }
 
@@ -46,6 +46,31 @@ public class Main {
                         if (modifiedTree != null && syntaxTreeModFile != null) {
                             FileHandler.writeSyntaxTree(syntaxTreeModFile, modifiedTree);
                         }
+                    } else {
+                        System.err.println("Синтаксическая ошибка! Неверный порядок токенов.");
+                    }
+                } else if (mode.equals("GEN1")) {
+                    SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzer();
+                    Node syntaxTree = syntaxAnalyzer.analyze(tokens);
+
+                    if (syntaxTree != null) {
+                        IntermediateCodeGenerator codeGenerator = new IntermediateCodeGenerator(analyzer.getSymbolTable());
+                        List<String> threeAddressCode = codeGenerator.generate(syntaxTree);
+                        FileHandler.writeThreeAddressCode("portable_code.txt", threeAddressCode);
+                        FileHandler.writeSymbolTable(symbolsFile, codeGenerator.getSymbolTable().getSymbols());
+
+                    } else {
+                        System.err.println("Синтаксическая ошибка! Неверный порядок токенов.");
+                    }
+                } else if (mode.equals("GEN2")) {
+                    SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzer();
+                    Node syntaxTree = syntaxAnalyzer.analyze(tokens);
+
+                    if (syntaxTree != null) {
+                        PostfixGenerator postfixGenerator = new PostfixGenerator(analyzer.getSymbolTable());
+                        List<String> postfixCode = postfixGenerator.generate(syntaxTree);
+                        FileHandler.writePostfixCode("postfix.txt", postfixCode);
+                        //FileHandler.writeSymbolTable(symbolsFile, codeGenerator.getSymbolTable().getSymbols());
                     } else {
                         System.err.println("Синтаксическая ошибка! Неверный порядок токенов.");
                     }
